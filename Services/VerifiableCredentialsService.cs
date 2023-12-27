@@ -14,6 +14,7 @@ using Application = Dgmjr.Mime.Application;
 using Microsoft.Extensions.Caching.Memory;
 using System.Runtime.Serialization;
 
+/// <summary>A class for manipulating verifiable credentials</summary>
 public class VerifiableCredentialsService(
     ILogger<VerifiableCredentialsService> logger,
     IDownstreamApi verifiableCredentialsApp,
@@ -190,8 +191,17 @@ public class VerifiableCredentialsService(
                 options.Scopes = [Scopes.Issuer];
                 options.HttpMethod = HttpMethod.Post.ToString();
                 options.RelativePath = IssuerOptions.Urls.CreateIssuanceRequest;
-                options.Serializer = content =>
-                    new StringContent(Serialize(content, JsonSerializerOptions));
+                options.Serializer = value =>
+                {
+                    var content = new StringContent(Serialize(value, JsonSerializerOptions));
+                    content.Headers.ContentType = new(Application.Json.DisplayName);
+                    return content;
+                };
+                options.CustomizeHttpRequestMessage = message =>
+                {
+                    message.Content = new StringContent(Serialize(request, JsonSerializerOptions));
+                    message.Content.Headers.ContentType = new(Application.Json.DisplayName);
+                };
                 options.Deserializer = content =>
                     content
                         .ReadAsStringAsync()
