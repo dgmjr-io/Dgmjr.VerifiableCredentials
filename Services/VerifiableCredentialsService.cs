@@ -11,7 +11,7 @@ using Microsoft.Maui.Graphics.Platform;
 using System.Net.Http;
 using Dgmjr.Mime;
 using Application = Dgmjr.Mime.Application;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using System.Runtime.Serialization;
 
 /// <summary>A class for manipulating verifiable credentials</summary>
@@ -20,7 +20,7 @@ public class VerifiableCredentialsService(
     IDownstreamApi verifiableCredentialsApp,
     IOptionsMonitor<VerifiableCredentialsIssuerApiOptions> vcIssuerOptions,
     IOptionsMonitor<VerifiableCredentialsAdminApiOptions> vcAdminApiOptions,
-    IMemoryCache cache,
+    IDistributedCache cache,
     IOptionsMonitor<JsonOptions> jso
 ) : IVerifiableCredentialsService
 {
@@ -29,10 +29,11 @@ public class VerifiableCredentialsService(
     public VerifiableCredentialsIssuerApiOptions IssuerOptions => vcIssuerOptions.CurrentValue;
     public VerifiableCredentialsAdminApiOptions AdminApiOptions => vcAdminApiOptions.CurrentValue;
     private const string VerifiedEmployee = "Verified Employee";
-    private readonly IMemoryCache _cache = cache;
+    private readonly IDistributedCache _cache = cache;
     private Jso JsonSerializerOptions => jso.CurrentValue.JsonSerializerOptions;
     private static readonly DateTimeOffset _absoluteExpiration =
         new(9999, 1, 1, 1, 1, 1, new duration(0, 0, 0));
+    private static readonly DistributedCacheEntryOptions _cacheEntryOptions = new() { AbsoluteExpiration = _absoluteExpiration };
 
     public async Task<VCContract[]> GetVCContractsAsync()
     {
@@ -42,9 +43,8 @@ public class VerifiableCredentialsService(
         );
         return (await _cache.GetOrCreateAsync(
             nameof(GetVCContractsAsync),
-            async entry =>
+            async () =>
             {
-                entry.AbsoluteExpiration = _absoluteExpiration;
                 Logger.LogCacheMiss(nameof(GetVCContractsAsync));
 
                 var vcs = await _verifiableCredentialsApp.CallApiForUserAsync<
@@ -71,17 +71,14 @@ public class VerifiableCredentialsService(
                                 .Result;
                     }
                 );
-                return entry
-                        .SetValue(
-                            vcs.Value
+                return vcs.Value
                                 .Where(
                                     vc =>
                                         !vc.Name.Equals(VerifiedEmployee, CurrentCultureIgnoreCase)
                                 )
-                                .ToArray()
-                        )
-                        .Value as VCContract[];
-            }
+                                .ToArray();
+            },
+            _cacheEntryOptions
         ))!;
     }
 
@@ -112,16 +109,16 @@ public class VerifiableCredentialsService(
         var cacheKey = $"{GetCredentialIconAsync}({credentialId})";
         return (await _cache.GetOrCreateAsync(
             cacheKey,
-            async entry =>
+            async () =>
             {
-                entry.AbsoluteExpiration = _absoluteExpiration;
                 Logger.LogCacheMiss(cacheKey);
                 var (_, _, _, _, logo) = Find(
                     await GetVCsAsync(),
                     vc => vc.Id.Equals(credentialId, CurrentCultureIgnoreCase)
                 );
-                return entry.SetValue(logo).Value as VCLogo;
-            }
+                return logo;
+            },
+            _cacheEntryOptions
         ))!;
     }
 
@@ -151,9 +148,8 @@ public class VerifiableCredentialsService(
         );
         return (await _cache.GetOrCreateAsync(
             nameof(GetAuthoritiesAsync),
-            async entry =>
+            async () =>
             {
-                entry.AbsoluteExpiration = _absoluteExpiration;
                 Logger.LogCacheMiss(nameof(GetAuthoritiesAsync));
                 var authorities = await _verifiableCredentialsApp.CallApiForUserAsync<
                     ApiResponsePayload<VCAuthority[]>
@@ -177,8 +173,9 @@ public class VerifiableCredentialsService(
                                 .Result;
                     }
                 );
-                return entry.SetValue(authorities.Value).Value as VCAuthority[];
-            }
+                return authorities.Value;
+            },
+            _cacheEntryOptions
         ))!;
     }
 
