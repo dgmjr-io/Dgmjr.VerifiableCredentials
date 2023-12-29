@@ -14,10 +14,22 @@ public record class VCLogo
 
     public float Height => Image.Height;
     public float Width => Image.Width;
+    [JIgnore]
     public byte[] Data => Uri.OpenRead().ReadAllBytes();
 
     private IImage _image;
 
     [JIgnore]
-    public IImage Image => _image ??= PlatformImage.FromStream(Uri.OpenRead());
+    public IImage Image
+    {
+        get
+        {
+            if(_image == null)
+            {
+                using var s = Uri.OpenRead();
+                _image = PlatformImage.FromStream(s);
+            }
+            return _image;
+        }
+    }
 }
