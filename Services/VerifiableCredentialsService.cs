@@ -221,6 +221,92 @@ public class VerifiableCredentialsService(
         ))!;
     }
 
+    public async Task<DidDocument> GenerateDidDocument(guid authorityId, UriOrString domainUrl)
+    {
+        Logger.LogCallingDownstreamApi(
+            VerifiableCredentialsIssuerApiOptions.AppSettingsKey,
+            IssuerOptions.Urls.GenerateDidDocument(authorityId)
+        );
+        return (await _verifiableCredentialsApp.CallApiForAppAsync<DidDocument>(
+            VerifiableCredentialsIssuerApiOptions.AppSettingsKey,
+            options =>
+            {
+                // options.Scopes = [Scopes.Issuer];
+                options.HttpMethod = HttpMethod.Post.ToString();
+                options.RelativePath = IssuerOptions.Urls.GenerateDidDocument(authorityId);
+                options.Serializer = value =>
+                {
+                    var content = new StringContent(Serialize(value, JsonSerializerOptions));
+                    content.Headers.ContentType = new(Application.Json.DisplayName);
+                    return content;
+                };
+                options.CustomizeHttpRequestMessage = message =>
+                {
+                    message.Content = new StringContent(Serialize(domainUrl, JsonSerializerOptions));
+                    message.Content.Headers.ContentType = new(Application.Json.DisplayName);
+                };
+                options.Deserializer = content =>
+                    content
+                        .ReadAsStringAsync()
+                        .ContinueWith(task =>
+                        {
+                            Logger.LogInformation(task.Result);
+                            return Deserialize<DidDocument>(task.Result, JsonSerializerOptions);
+                        })
+                        .Result;
+
+                Logger.LogCallingDownstreamApi(
+                    VerifiableCredentialsIssuerApiOptions.AppSettingsKey,
+                    options.GetApiUrl(),
+                    Serialize(domainUrl, JsonSerializerOptions)
+                );
+            }
+        ))!;
+    }
+
+    public async Task<WellKnownDidConfiguration> GenerateWellKnownDidConfiguration(guid authorityId, UriOrString domainUrl)
+    {
+        Logger.LogCallingDownstreamApi(
+            VerifiableCredentialsIssuerApiOptions.AppSettingsKey,
+            IssuerOptions.Urls.GenerateWellKnownDidConfiguration(authorityId)
+        );
+        return (await _verifiableCredentialsApp.CallApiForAppAsync<WellKnownDidConfiguration>(
+            VerifiableCredentialsIssuerApiOptions.AppSettingsKey,
+            options =>
+            {
+                options.Scopes = [Scopes.Issuer];
+                options.HttpMethod = HttpMethod.Get.ToString();
+                options.RelativePath = IssuerOptions.Urls.GenerateWellKnownDidConfiguration(authorityId);
+                options.Serializer = value =>
+                {
+                    var content = new StringContent(Serialize(value, JsonSerializerOptions));
+                    content.Headers.ContentType = new(Application.Json.DisplayName);
+                    return content;
+                };
+                options.CustomizeHttpRequestMessage = message =>
+                {
+                    message.Content = new StringContent(Serialize(domainUrl, JsonSerializerOptions));
+                    message.Content.Headers.ContentType = new(Application.Json.DisplayName);
+                };
+                options.Deserializer = content =>
+                    content
+                        .ReadAsStringAsync()
+                        .ContinueWith(task =>
+                        {
+                            Logger.LogInformation(task.Result);
+                            return Deserialize<WellKnownDidConfiguration>(task.Result, JsonSerializerOptions);
+                        })
+                        .Result;
+
+                Logger.LogCallingDownstreamApi(
+                    VerifiableCredentialsIssuerApiOptions.AppSettingsKey,
+                    options.GetApiUrl(),
+                    Serialize(domainUrl, JsonSerializerOptions)
+                );
+            }
+        ))!;
+    }
+
     public async Task<VCAuthority> CreateAuthorityAsync(VCAuthorityCreateDto createDto)
     {
         Logger.LogCallingDownstreamApi(

@@ -4,15 +4,15 @@ namespace Dgmjr.VerifiableCredentials.Models;
 public partial class DidUri(string uriString) : Uri(uriString)
 {
     public const string DidScheme = "did";
-    private const RegexOptions Options = RegexOptions.Compiled | RegexOptions.IgnoreCase;
+    private const Rxo Options = Rxo.Compiled | Rxo.IgnoreCase;
 
     private const string RegexString = $"^{DidScheme}:(?<method>[a-z]+):(?<id>[a-zA-Z0-9.]+)$";
     #if !NET7_0_OR_GREATER
-    private static readonly Regex _regex = new(RegexString, Options);
-    private static Regex Regex() => _regex;
+    private static readonly Regx _regex = new(RegexString, Options);
+    private static Regx Regex() => _regex;
     #else
     [GeneratedRegex(RegexString, Options)]
-    private static partial Regex Regex();
+    private static partial Regx Regex();
     #endif
 
     private string? _uriString;

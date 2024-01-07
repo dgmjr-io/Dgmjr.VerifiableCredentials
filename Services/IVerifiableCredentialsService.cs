@@ -1,6 +1,7 @@
 namespace Dgmjr.VerifiableCredentials.Services;
 
 using Microsoft.Maui.Graphics;
+using Models;
 
 public interface IVerifiableCredentialsService : ILog
 {
@@ -20,4 +21,6 @@ public interface IVerifiableCredentialsService : ILog
     VCIssuanceRequest CreateIssuanceRequest(guid contractId, Uri callbackUrl, string stateId, CustomClaimMapper customClaimMapper);
     VerifiableCredentialsIssuerApiOptions IssuerOptions { get; }
     Task<VCAuthority> CreateAuthorityAsync(VCAuthorityCreateDto createDto);
+    Task<WellKnownDidConfiguration> GenerateWellKnownDidConfiguration(guid authorityId, UriOrString domainUrl);
+    Task<DidDocument> GenerateDidDocument(guid authorityId, UriOrString domainUrl);
 }

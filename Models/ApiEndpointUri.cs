@@ -25,7 +25,7 @@ public class ApiEndpointUri(string uriString)  : UriOrString(uriString)
 
     public string Authorities => "authorities";
     public string GenerateDidDocument(guid authorityId) => $"authorities/{authorityId}/generateDidDocument";
-    public string GenerateWellknownDidConfiguration(guid authorityId) => $"authorities/{authorityId}/generateWellknownDidConfiguration";
+    public string GenerateWellKnownDidConfiguration(guid authorityId) => $"authorities/{authorityId}/generateWellknownDidConfiguration";
     public string Authority(guid authorityId) => $"authorities/{authorityId}";
     public string Contracts(guid authorityId) => $"authorities/{authorityId}/contracts";
     public string Contract(guid authorityId, string contractId) => $"authorities/{authorityId}/contracts/{contractId}";
