@@ -8,7 +8,7 @@ using Dgmjr.VerifiableCredentials.Json;
 
 public class VerifiableCredentialsAdminApiOptions : DownstreamApiOptions
 {
-    public const string AppSettingsKey = nameof(VerifiableCredentialsAdminApiOptions);
+    public const string AppSettingsKey = $"{nameof(DownstreamApis)}:VerifiableCredentialsAdminApi";
 
     public const string DefaultApiEndpointString =
         "https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/{0}";
@@ -21,7 +21,7 @@ public class VerifiableCredentialsAdminApiOptions : DownstreamApiOptions
 }
 public class VerifiableCredentialsIssuerApiOptions : DownstreamApiOptions
 {
-    public const string AppSettingsKey = nameof(VerifiableCredentialsIssuerApiOptions);
+    public const string AppSettingsKey = $"{nameof(DownstreamApis)}:VerifiableCredentialsIssuer";
 
     public const string DefaultApiEndpointString =
         "https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/{0}";
