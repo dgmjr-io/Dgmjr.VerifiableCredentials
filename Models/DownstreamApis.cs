@@ -6,7 +6,7 @@ public interface IDownstreamApis
     VerifiableCredentialsAdminApiOptions VerifiableCredentialsIssuer { get; set; }
 }
 
-public record class DownstreamApis : Dgmjr.Web.DownstreamApis.DownstreamApis, IDownstreamApis
+public class DownstreamApis : Dgmjr.Web.DownstreamApis.DownstreamApis, IDownstreamApis
 {
     [JProp(nameof(Models.VerifiableCredentialsAdminApiOptions))]
     VerifiableCredentialsAdminApiOptions IDownstreamApis.VerifiableCredentialsOptions { get; set; }

@@ -11,7 +11,7 @@ public class VerifiableCredentialsAutoConfigurator : IConfigureIApplicationBuild
     {
     }
 
-    public void Configure(IHostApplicationBuilder builder)
+    public void Configure(WebApplicationBuilder builder)
     {
         builder.Services.AddVerifiableCredentials(builder.Configuration);
     }
